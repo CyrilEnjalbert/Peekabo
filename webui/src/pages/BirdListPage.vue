@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import DocumentUploader from "@/components/DocumentUploader.vue";
+import BirdList from "@/components/BirdList.vue";
 </script>
 
 <template>
   <div class="document-uploader">
-    <DocumentUploader />
+    <BirdList />
   </div>
 </template>
