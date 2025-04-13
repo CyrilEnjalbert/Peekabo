@@ -1,33 +1,66 @@
-# webui
+# Peekaboo - Front Interface
 
-This template should help get you started developing with Vue 3 in Vite.
+Cette interface utilise :
+- **Node.js** : Environnement d'exécution JavaScript côté serveur. (Node 22)
+- **Vite** : Outil de build rapide pour les projets front-end. (https://vite.dev/config/)
+- **Vue** : Framework JavaScript pour construire des interfaces utilisateur. (https://vuejs.org/guide/quick-start.html)
+- **Orval** : Générateur de methodes TypeScript basé sur OpenAPI. (https://orval.dev/)
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Installation du Projet
 
-## Type Support for `.vue` Imports in TS
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Installer les packages NPM et dépendences : 
 
-## Customize configuration
+```bash
+cd webui/
+```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
 
-```sh
+- Installer Orval :
+
+```bash
+cd webui/
+```
+
+```bash
+npm i orval -D
+```
+
+### Generer les méthodes TypeScript aec Orval : 
+
+*Le fichier de configuration Orval doit indiqué en "input", le dossier où est stocké le schéma "openapi.yaml", et en "output" : src/api/*
+
+(if the job is scripts{"generate-api"} in package.json)
+```bash
+npm run generate-api
+```
+Else
+
+```bash
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+Pour actualiser, supprimer les fichiers TypeScript dans /src/api et refaire la commande : 
 
-```sh
-npm run build
+
+(if the job is scripts{"generate-api"} in package.json)
+```bash
+npm run generate-api
+```
+
+
+## Lancement du Projet :
+
+```bash
+cd webui/
+```
+
+
+```bash
+npm run dev
 ```
