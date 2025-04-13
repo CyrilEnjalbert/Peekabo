@@ -1,3 +1,29 @@
+<script lang="ts">
+import { defineComponent, ref, onMounted } from 'vue';
+import type { Bird } from '@/api/peekaboo_methods.schemas';
+
+export default defineComponent({
+  name: 'BirdDetails',
+  props: {
+    birdId: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props) {
+    const bird = ref<Bird | null>(null);
+
+    onMounted(async () => {
+      const response = await fetch(`/api/birds/${props.birdId}`);
+      bird.value = await response.json();
+    });
+
+    return { bird };
+  },
+});
+</script>
+
+
 <template>
     <div v-if="bird">
       <h1>Bird Details</h1>
@@ -9,27 +35,3 @@
     </div>
   </template>
   
-  <script lang="ts">
-  import { defineComponent, ref, onMounted } from 'vue';
-  import type { Bird } from '@/api/peekaboo_methods.schemas';
-  
-  export default defineComponent({
-    name: 'BirdDetails',
-    props: {
-      birdId: {
-        type: Number,
-        required: true,
-      },
-    },
-    setup(props) {
-      const bird = ref<Bird | null>(null);
-  
-      onMounted(async () => {
-        const response = await fetch(`/api/birds/${props.birdId}`);
-        bird.value = await response.json();
-      });
-  
-      return { bird };
-    },
-  });
-  </script>
