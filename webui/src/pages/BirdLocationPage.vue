@@ -14,10 +14,19 @@ const birdPath = ref<L.LatLng[]>([
   L.latLng(48.8566, 2.3522), // Initial point (Paris)
 ]);
 
+var myIcon = L.icon({
+    iconUrl: '../Chatbot Quarkus EXATECH(1).png',
+    iconSize: [95, 95],
+    iconAnchor: [50, 70],
+    popupAnchor: [0, -76]
+});
+
 const map = ref<L.Map | null>(null);
 const marker = ref<L.Marker | null>(null);
 const polyline = ref<L.Polyline | null>(null);
-
+const title = {
+    title: "Bird Location",
+        };
 // Initialize the map
 onMounted(() => {
   map.value = L.map("map").setView([birdLocation.value.latitude, birdLocation.value.longitude], 13);
@@ -29,7 +38,7 @@ onMounted(() => {
   }).addTo(map.value);
 
   // Add a marker at the initial location
-  marker.value = L.marker([birdLocation.value.latitude, birdLocation.value.longitude]).addTo(map.value);
+  marker.value = L.marker([birdLocation.value.latitude, birdLocation.value.longitude], {icon: myIcon}).addTo(map.value);
 
   // Add a polyline to track the bird's path
   polyline.value = L.polyline(birdPath.value, { color: "blue" }).addTo(map.value);
