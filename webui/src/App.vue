@@ -5,8 +5,8 @@ import { RouterLink, RouterView } from 'vue-router';
 <template>
   <header>
     <div class="header-content">
-      <img src="../image_peekaboo.png" alt="Peekaboo Icon" class="chatbot-icon" width="auto"/>
-      <h1 class="hometitle">Peekaboo</h1>
+      <img src="../img/image_peekaboo.png" alt="Peekaboo Icon" class="chatbot-icon" height="auto" width="auto"/>
+      <h1 class="button">Peekaboo</h1>
     </div>
     <nav>
       <RouterLink to="/">Home</RouterLink>

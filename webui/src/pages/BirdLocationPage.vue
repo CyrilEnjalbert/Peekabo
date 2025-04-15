@@ -15,7 +15,7 @@ const birdPath = ref<L.LatLng[]>([
 ]);
 
 var myIcon = L.icon({
-    iconUrl: '../Chatbot Quarkus EXATECH(1).png',
+    iconUrl: 'img/Chatbot Quarkus EXATECH(1).png',
     iconSize: [95, 95],
     iconAnchor: [50, 70],
     popupAnchor: [0, -76]

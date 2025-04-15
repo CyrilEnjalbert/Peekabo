@@ -1,51 +1,77 @@
 <template>
-    <div>
-      <h1>Login</h1>
-      <form @submit.prevent="login">
-        <label>
-          Email:
-          <input v-model="credentials.email" type="email" required />
-        </label>
-        <label>
-          Password:
-          <input v-model="credentials.password" type="password" required />
-        </label>
-        <button type="submit">Login</button>
-      </form>
-      <p v-if="error" class="error">{{ error }}</p>
-    </div>
-  </template>
-  
-  <script lang="ts">
-  import { defineComponent, reactive, ref } from 'vue';
-  import type { PostLoginBody, PostLogin200, PostLogin401 } from '@/api/peekaboo_methods.schemas';
-  
-  export default defineComponent({
-    name: 'LoginForm',
-    setup() {
-      const credentials = reactive<PostLoginBody>({
-        email: '',
-        password: '',
-      });
-      const error = ref<string | null>(null);
-  
-      const login = async () => {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(credentials),
-        });
-  
-        if (response.ok) {
-          const data: PostLogin200 = await response.json();
-          alert(`Login successful! Token: ${data.token}`);
-        } else {
-          const errorData: PostLogin401 = await response.json();
-          error.value = errorData.error ?? '';
-        }
-      };
-  
-      return { credentials, login, error };
+  <div class="login-form">
+    <h1>Login</h1>
+    <form @submit.prevent="handleLogin">
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" v-model="username" required placeholder="Enter your username" />
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" v-model="password" required placeholder="Enter your password" />
+      </div>
+      <button type="submit" class="login-button">Login</button>
+      <p class="signup-link">
+        Don't have an account? <router-link to="/signup">Sign Up</router-link>
+      </p>
+    </form>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      username: '',
+      password: '',
+    };
+  },
+  methods: {
+    handleLogin() {
+      console.log('Logging in with:', this.username, this.password);
+      // Add authentication logic here
     },
-  });
-  </script>
+  },
+};
+</script>
+
+<style scoped>
+.login-form {
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.signup-link {
+  margin-top: 10px;
+  text-align: center;
+}
+</style>
