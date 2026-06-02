@@ -7,25 +7,78 @@ services:
       dockerfile: Dockerfile
     container_name: peekaboo_symfony
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
       - .:/var/www/html
     depends_on:
       - db
     environment:
-      DATABASE_URL: "postgresql://postgres:your_password@db:5432/app"
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/app"
   
   db:
     image: postgres:14
     container_name: peekaboo_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: your_password
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: app
     ports:
-      - "5435:5432"
+      - "5435:5435"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+
+  peekaboo_class_model_service:
+    container_name: peekaboo_class_model_service
+    build:
+      context: ../peekaboo_class_model_service
+      dockerfile: Dockerfile
+    ports:
+      - "8060:8060"
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+    
+  front:
+    build:
+      context: ../peekabofront
+      dockerfile: Dockerfile.front
+    container_name: peekaboo_front
+    ports:
+      - "8010:8010"
+    volumes:
+      - ../peekabofront:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://app:80
+    depends_on:
+      - app
+
+  # Ollama Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ../ollama-data:/root/.ollama
+      - ../ollama/init-model.sh:/init-model.sh
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "/init-model.sh"]
+
+  mover:
+    build:
+      context: ./mover
+      dockerfile: Dockerfile.mover
+    container_name: peekaboo_mover
+    depends_on:
+      - app
+    environment:
+      API_URL: http://app
+      GPS_ID: "CAVAL01"
+    restart: always
+
 volumes:
   postgres_data:
+

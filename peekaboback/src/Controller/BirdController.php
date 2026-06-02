@@ -25,13 +25,19 @@ class BirdController extends AbstractController
     public function getAllBirds(): JsonResponse
     {
         $birds = $this->entityManager->getRepository(Bird::class)->findAll();
-        
+
         $response = array_map(function (Bird $bird) {
+            // Récupération de la dernière position connue depuis LocationHistory
+            $lastLocation = $this->entityManager->getRepository(LocationHistory::class)->findOneBy(
+                ['bird' => $bird],
+                ['timestamp' => 'DESC']
+            );
+
             return [
                 'id' => $bird->getId(),
                 'name' => $bird->getName(),
-                'latitude' => $bird->getLatitude(),
-                'longitude' => $bird->getLongitude(),
+                'latitude' => $lastLocation?->getLatitude(), // null-safe
+                'longitude' => $lastLocation?->getLongitude(),
                 'owner' => $bird->getOwner()->getUsername(),
             ];
         }, $birds);
@@ -39,13 +45,15 @@ class BirdController extends AbstractController
         return $this->json($response);
     }
 
-    #[Route('/user/{userId}/birds', name: 'get_user_birds', methods: ['GET'])]
-    public function getUserBirds(int $userId): JsonResponse
+
+    #[Route('/user/birds', name: 'get_my_birds', methods: ['GET'])]
+    public function getMyBirds(): JsonResponse
     {
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        /** @var User $user */
+        $user = $this->getUser();
 
         if (!$user) {
-            return $this->json(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
         $birds = $this->entityManager->getRepository(Bird::class)->findBy(['owner' => $user]);
@@ -54,8 +62,6 @@ class BirdController extends AbstractController
             return [
                 'id' => $bird->getId(),
                 'name' => $bird->getName(),
-                'latitude' => $bird->getLatitude(),
-                'longitude' => $bird->getLongitude(),
                 'gps_id' => $bird->getGpsId(),
             ];
         }, $birds);
@@ -63,32 +69,37 @@ class BirdController extends AbstractController
         return $this->json($response);
     }
 
+
     #[Route('/bird/{gpsId}/locations', name: 'update_locations', methods: ['POST'])]
-    public function updateLocations(string $gpsId, Request $request): JsonResponse
+    public function updateLocations(string $gpsId, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['locations']) || !is_array($data['locations'])) {
-            return $this->json(['error' => 'Invalid payload'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => 'Invalid payload'], Response::HTTP_BAD_REQUEST);
         }
 
-        $bird = $this->entityManager->getRepository(Bird::class)->findOneBy(['gpsId' => $gpsId]);
+        $bird = $entityManager->getRepository(Bird::class)->findOneBy(['gpsId' => $gpsId]);
 
         if (!$bird) {
-            return $this->json(['error' => 'Bird not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Bird not found'], Response::HTTP_NOT_FOUND);
         }
 
-        foreach ($data['locations'] as $location) {
-            if (isset($location['latitude'], $location['longitude'])) {
-                $bird->setLatitude((float) $location['latitude']);
-                $bird->setLongitude((float) $location['longitude']);
+        foreach ($data['locations'] as $locationData) {
+            if (isset($locationData['latitude'], $locationData['longitude'])) {
+                $location = new LocationHistory();
+                $location->setLatitude((float) $locationData['latitude']);
+                $location->setLongitude((float) $locationData['longitude']);
+                $location->setTimestamp(new \DateTime());
+                $location->setBird($bird);
+
+                $entityManager->persist($location);
             }
         }
 
-        $this->entityManager->persist($bird);
-        $this->entityManager->flush();
+        $entityManager->flush();
 
-        return $this->json(['message' => 'Locations updated successfully']);
+        return new JsonResponse(['message' => 'Locations saved successfully']);
     }
 
     #[Route('/bird/{id}/location', name: 'get_last_location', methods: ['GET'])]
